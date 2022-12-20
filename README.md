@@ -1,3 +1,8 @@
+# BEFORE YOU ARE START READING THIS SECTION:
+This script isn't created by me all credits go for @tugamars
+I only turn this script into ESX Version
+
+
 # FiveM Pager
 Pager for FiveM, with Discord and QBCore integration.
 
