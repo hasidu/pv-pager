@@ -1,4 +1,12 @@
-QBCore = exports['qb-core']:GetCoreObject()
+--QBCore = exports['qb-core']:GetCoreObject()
+ESX = nil
+
+Citizen.CreateThread(function()
+  while ESX == nil do
+    TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+    Citizen.Wait(30)
+  end
+end)
 
 function dump(o)
     if type(o) == 'table' then
@@ -19,10 +27,13 @@ local function page(tune,text, src)
     local pagerTune = Config.Pager[tune];
 
     if(pagerTune == nil) then
-        TriggerClientEvent('QBCore:Notify', src, "The paged channel does not exist.", 'error')
+        --TriggerClientEvent('QBCore:Notify', src, "The paged channel does not exist.", 'error')
+        TriggerClientEvent('esx:showNotification', src, 'The paged channel does not exist.', "error", 3000)
+        --TriggerClientEvent('okokNotify:Alert', src, "PAGER", "The paged channel does not exist.", 3000, 'error') -- this is okok notify uncomment this if you have script
     end
 
-    local Player = QBCore.Functions.GetPlayer(src)
+    --local Player = QBCore.Functions.GetPlayer(src)
+    local Player = ESX.GetPlayerFromId(src)
     local authorized=false;
 
     if pagerTune.jobPermissions ~= nil then
@@ -34,7 +45,9 @@ local function page(tune,text, src)
         end
 
         if authorized == false then
-            TriggerClientEvent('QBCore:Notify', src, "You are not authenticated to broadcast on the paged channel.", 'error');
+            --TriggerClientEvent('QBCore:Notify', src, "You are not authenticated to broadcast on the paged channel.", 'error');
+            TriggerClientEvent('esx:showNotification', src, 'You are not authenticated to broadcast on the paged channel.', "error", 3000);
+            --TriggerClientEvent('okokNotify:Alert', src, "PAGER", "You are not authenticated to broadcast on the paged channel.", 3000, 'error'); -- this is okok notify uncomment this if you have script
             return false;
         end
 
@@ -45,12 +58,15 @@ local function page(tune,text, src)
 
         if authorized == false then
             TriggerClientEvent('QBCore:Notify', src, "You are not authenticated to broadcast on the paged channel.", 'error');
+            TriggerClientEvent('esx:showNotification', src, 'You are not authenticated to broadcast on the paged channel.', "error", 3000);
+            --TriggerClientEvent('okokNotify:Alert', src, "PAGER", "You are not authenticated to broadcast on the paged channel.", 3000, 'error'); -- this is okok notify uncomment this if you have script
             return false;
         end
     end
 
     if authorized then
-        local players = QBCore.Functions.GetQBPlayers()
+        -- local players = QBCore.Functions.GetQBPlayers()
+        local players = ESX.GetPlayerFromId(src)
         for _, v in pairs(players) do
             if(pagerTune.broadcastToJobs[v.PlayerData.job.name]) then
                 if(pagerTune.broadcastToRoles ~= nil) then
@@ -74,7 +90,20 @@ local function page(tune,text, src)
     sendToDiscord(Config.LogWebhook,pagerTune.title,text, "New pager!",src,true);
 end
 
-QBCore.Commands.Add("page", "Use the pager", {}, false, function(source, args)
+-- QBCore.Commands.Add("page", "Use the pager", {}, false, function(source, args)
+--     local src = source
+
+--     local pagerTune = args[1];
+--     args[1]="";
+
+--     local text=table.concat(args, " ");
+
+--     page(pagerTune,text,src);
+-- end)
+
+ESX.RegisterCommand({'page', 'pg'}, 'user', function(source, args)
+    --xPlayer.triggerEvent('chat:clear')
+
     local src = source
 
     local pagerTune = args[1];
@@ -83,7 +112,9 @@ QBCore.Commands.Add("page", "Use the pager", {}, false, function(source, args)
     local text=table.concat(args, " ");
 
     page(pagerTune,text,src);
-end)
+
+end, false, {help = 'page text'})
+-- https://docs.esx-framework.org/legacy/Server/functions/registercommand
 
 
 function sendToDiscord(url,title,text, content,src, admin)

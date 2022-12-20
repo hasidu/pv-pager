@@ -4,7 +4,7 @@ I only turn this script into ESX Version
 
 
 # FiveM Pager
-Pager for FiveM, with Discord and QBCore integration.
+Pager for FiveM, with Discord and ESX integration.
 
 ## Command
 
